@@ -7,6 +7,7 @@ import { UserProfile, PortfolioRecommendation } from '@/types';
 
 export default function Home() {
   const [portfolio, setPortfolio] = useState<PortfolioRecommendation | null>(null);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -14,6 +15,7 @@ export default function Home() {
     setIsLoading(true);
     setError(null);
     setPortfolio(null);
+    setUserProfile(profile); // Store the profile for display
 
     try {
       const response = await fetch('/api/generate-portfolio', {
@@ -60,7 +62,7 @@ export default function Home() {
           </div>
           <div>
             <h2 className="text-xl font-semibold mb-4 text-text-primary">AI-Generated Portfolio</h2>
-            <PortfolioResult portfolio={portfolio} isLoading={isLoading} error={error} />
+            <PortfolioResult portfolio={portfolio} userProfile={userProfile} isLoading={isLoading} error={error} />
           </div>
         </div>
       </main>

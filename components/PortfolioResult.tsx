@@ -1,12 +1,13 @@
 'use client';
 
 import React, { useMemo } from 'react';
-import { PortfolioRecommendation } from '@/types';
+import { PortfolioRecommendation, UserProfile, Country } from '@/types';
 import Card from '@/components/ui/Card';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 interface PortfolioResultProps {
   portfolio: PortfolioRecommendation | null;
+  userProfile: UserProfile | null;
   isLoading: boolean;
   error: string | null;
 }
@@ -24,7 +25,20 @@ const CustomTooltip: React.FC<any> = ({ active, payload }) => {
   return null;
 };
 
-const PortfolioResult: React.FC<PortfolioResultProps> = ({ portfolio, isLoading, error }) => {
+const PortfolioResult: React.FC<PortfolioResultProps> = ({ portfolio, userProfile, isLoading, error }) => {
+
+  // Get currency symbol based on user's country
+  const currencySymbol = useMemo(() => {
+    if (!userProfile) return '$';
+    switch (userProfile.country) {
+      case Country.MALAWI:
+        return 'MWK';
+      case Country.BOTSWANA:
+        return 'BWP';
+      default:
+        return '$';
+    }
+  }, [userProfile]);
 
   const chartData = useMemo(() => {
     return portfolio?.recommended_portfolio.map(p => ({
@@ -32,6 +46,14 @@ const PortfolioResult: React.FC<PortfolioResultProps> = ({ portfolio, isLoading,
       value: parseFloat(p.allocation),
     })) ?? [];
   }, [portfolio]);
+
+  // Calculate actual amounts if investment amount is provided
+  const calculateAmount = (percentage: string) => {
+    if (!userProfile?.investmentAmount) return null;
+    const amount = userProfile.investmentAmount;
+    const percent = parseFloat(percentage) / 100;
+    return (amount * percent).toLocaleString();
+  };
 
   const renderContent = () => {
     if (isLoading) {
@@ -120,7 +142,14 @@ const PortfolioResult: React.FC<PortfolioResultProps> = ({ portfolio, isLoading,
                 {portfolio.recommended_portfolio.map((asset, index) => (
                   <tr key={index}>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-text-primary">{asset.category}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-text-secondary">{asset.allocation}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-text-secondary">
+                      {asset.allocation}
+                      {calculateAmount(asset.allocation) && (
+                        <span className="block text-xs text-brand-accent font-semibold mt-1">
+                          {currencySymbol} {calculateAmount(asset.allocation)}
+                        </span>
+                      )}
+                    </td>
                     <td className="px-6 py-4 whitespace-normal text-sm text-text-secondary">{asset.reason}</td>
                   </tr>
                 ))}

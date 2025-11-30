@@ -28,60 +28,86 @@ const responseSchema = {
 };
 
 const buildPrompt = (profile: UserProfile, marketContext: string, spendingData: string): string => {
+  // Helper to get currency symbol
+  const getCurrency = () => {
+    switch (profile.country) {
+      case 'Malawi': return 'MWK';
+      case 'Botswana': return 'BWP';
+      default: return 'USD';
+    }
+  };
+
+  const currency = getCurrency();
+  const marketFocus = profile.country === 'Malawi' ? 'Malawi Stock Exchange (MSE)' :
+    profile.country === 'Botswana' ? 'Botswana Stock Exchange (BSE)' :
+      'emerging markets';
+
   return `
   System Role:
   You are FinCraft AI, a financial intelligence assistant that helps investors build personalized portfolios based on their goals, risk tolerance, and market conditions.
   Your task is to analyze a user's investment profile and current market context, then recommend an optimal asset allocation. You must reason carefully, stay factual, and present recommendations in a structured, explainable JSON format.
 
-  IMPORTANT: You have access to Google Search to retrieve real-time market data. Use this capability to provide accurate, up-to-date information about Malawi and Botswana markets.
+  IMPORTANT: You have access to Google Search to retrieve real-time market data. Use this capability to provide accurate, up-to-date information about ${profile.country} markets.
 
   CONTEXT YOU ALWAYS CONSIDER:
-  1. User Profile Data: Age, income level, investment horizon, risk tolerance, primary goals.
-  2. Market Context: Economic trends (inflation, interest rates, GDP), sector/regional performance, asset fundamentals.
-  3. Investment Principles: Diversification, risk-adjusted returns, liquidity, stability, and time horizon alignment.
-  4. **LOCAL MARKET FOCUS**: Prioritize investment opportunities and data from:
-     - Malawi Stock Exchange (MSE)
-     - Botswana Stock Exchange (BSE)
-     - Regional SADC markets
-     - Local currency considerations (MWK - Malawi Kwacha, BWP - Botswana Pula)
-     - Local economic indicators and government securities
+  1. User Profile Data: Location, age, income level, investment amount, investment horizon, risk tolerance, primary goals.
+  2. Financial Situation: Current savings, monthly expenses, existing investments.
+  3. Investment Preferences: Sector interests, ESG preferences, local vs international preference.
+  4. Market Context: Economic trends (inflation, interest rates, GDP), sector/regional performance, asset fundamentals.
+  5. Investment Principles: Diversification, risk-adjusted returns, liquidity, stability, and time horizon alignment.
+  6. **LOCAL MARKET FOCUS**: Prioritize investment opportunities and data from ${marketFocus}.
 
   TASK STEPS (Chain of Thought Guide):
   1. Use Google Search to gather current information about:
-     - Malawi Stock Exchange performance and listed companies
-     - Botswana Stock Exchange performance and listed companies
-     - Current inflation rates, interest rates, and GDP growth in Malawi and Botswana
-     - Currency exchange rates (MWK/USD, BWP/USD)
-     - Regional investment opportunities (mining in Botswana, agriculture in Malawi, etc.)
+     - ${marketFocus} performance and listed companies
+     - Current inflation rates, interest rates, and GDP growth in ${profile.country}
+     - Currency exchange rates (${currency}/USD)
+     - ${profile.preferences.sectors.length > 0 ? `Specific sectors: ${profile.preferences.sectors.join(', ')}` : 'Key sectors in the region'}
+     - ${profile.preferences.esgPreference ? 'ESG/Sustainable investment options' : ''}
      - Local government bonds and treasury bills
   2. Interpret the user's risk profile and financial goals.
-  3. Evaluate current market data to identify suitable asset categories available in these markets.
-  4. Recommend portfolio allocations as percentages across: Equities (MSE/BSE stocks, regional stocks), Bonds (Malawi/Botswana govt bonds, corporate bonds), Real Estate / REITs (local options), Commodities / Alternatives, Cash / Short-term assets (local currency considerations).
-  5. Estimate expected annualized return and risk level based on current market conditions.
-  6. Explain reasoning clearly — why each asset class suits the user profile AND the local market context.
-  7. Highlight rebalancing tips and currency diversification strategies.
+  3. Consider the user's financial situation (savings, expenses, existing investments) for cash flow planning.
+  4. Align recommendations with user's sector preferences${profile.preferences.esgPreference ? ' and ESG criteria' : ''}.
+  5. Balance local (${profile.preferences.localInternationalSplit}%) vs international exposure based on user preference.
+  6. ${profile.investmentAmount ? `Calculate concrete amounts for a ${currency} ${profile.investmentAmount} investment.` : 'Provide percentage allocations.'}
+  7. Recommend portfolio allocations across: Equities, Bonds, Real Estate/REITs, Commodities/Alternatives, Cash/Short-term assets.
+  8. Estimate expected annualized return and risk level based on current market conditions.
+  9. Explain reasoning clearly — why each asset class suits the user profile AND the local market context.
+  10. Highlight rebalancing tips and currency diversification strategies.
 
   ---
 
   USER-PROVIDED DATA:
 
-  1. User Profile:
+  1. Location & Personal Details:
+     - Country: ${profile.country}
      - Age: ${profile.age || 'Not provided'}
-     - Annual Income: ${profile.income ? `$${profile.income}` : 'Not provided'}
+     - Annual Income: ${profile.income ? `${currency} ${profile.income}` : 'Not provided'}
+     - Investment Amount: ${profile.investmentAmount ? `${currency} ${profile.investmentAmount}` : 'Not specified'}
      - Investment Horizon: ${profile.horizon} years
      - Risk Tolerance: ${profile.riskTolerance}
      - Primary Goal: ${profile.primaryGoal}
 
-  2. Current Market Context:
-     ${marketContext || 'No specific market context provided. Use Google Search to find current economic conditions in Malawi and Botswana.'}
+  2. Financial Situation:
+     - Current Savings: ${profile.financialSituation.currentSavings ? `${currency} ${profile.financialSituation.currentSavings}` : 'Not provided'}
+     - Monthly Expenses: ${profile.financialSituation.monthlyExpenses ? `${currency} ${profile.financialSituation.monthlyExpenses}` : 'Not provided'}
+     - Existing Investments: ${profile.financialSituation.existingInvestments ? `${currency} ${profile.financialSituation.existingInvestments}` : 'Not provided'}
 
-  3. User Spending Data from Uploaded Document:
+  3. Investment Preferences:
+     - Sectors of Interest: ${profile.preferences.sectors.length > 0 ? profile.preferences.sectors.join(', ') : 'No specific preference'}
+     - ESG/Sustainable Preference: ${profile.preferences.esgPreference ? 'Yes' : 'No'}
+     - Local vs International Split: ${profile.preferences.localInternationalSplit}% local, ${100 - profile.preferences.localInternationalSplit}% international
+
+  4. Current Market Context:
+     ${marketContext || `No specific market context provided. Use Google Search to find current economic conditions in ${profile.country}.`}
+
+  5. User Spending Data from Uploaded Document:
      ${spendingData || 'No spending data provided.'}
 
   ---
 
   FINAL INSTRUCTION:
-  Based on all the provided information AND real-time data from Google Search about Malawi and Botswana markets, generate an optimal asset allocation. Your output MUST be a single, valid JSON object that strictly adheres to the following structure:
+  Based on all the provided information AND real-time data from Google Search about ${profile.country} markets, generate an optimal asset allocation. Your output MUST be a single, valid JSON object that strictly adheres to the following structure:
 
   {
     "risk_profile": "string describing the risk profile",
@@ -96,12 +122,13 @@ const buildPrompt = (profile: UserProfile, marketContext: string, spendingData: 
     "expected_return": "expected return as string",
     "estimated_risk_level": "risk level as string",
     "rebalancing_tip": "rebalancing advice as string",
-    "narrative_summary": "comprehensive summary incorporating search insights"
+    "narrative_summary": "comprehensive summary incorporating search insights about ${profile.country} markets, addressing user's sector preferences${profile.preferences.esgPreference ? ' and ESG criteria' : ''}, and financial situation"
   }
 
   CRITICAL: Return ONLY the JSON object, nothing else. Do not include markdown formatting, explanations, or any text before or after the JSON.
   
-  In your narrative_summary, naturally incorporate insights from the search results about current market conditions in Malawi and Botswana.
+  ${profile.investmentAmount ? `In your recommendations, reference the specific investment amount of ${currency} ${profile.investmentAmount} and how it should be allocated.` : ''}
+  In your narrative_summary, naturally incorporate insights from the search results about current market conditions in ${profile.country}.
   `;
 };
 

@@ -1,4 +1,10 @@
 
+export enum Country {
+  MALAWI = 'Malawi',
+  BOTSWANA = 'Botswana',
+  OTHER = 'Other',
+}
+
 export enum RiskTolerance {
   CONSERVATIVE = 'Conservative',
   BALANCED = 'Balanced',
@@ -11,17 +17,42 @@ export enum PrimaryGoal {
   CAPITAL_PRESERVATION = 'Capital Preservation',
 }
 
+export enum Sector {
+  AGRICULTURE = 'Agriculture',
+  MINING = 'Mining & Resources',
+  FINANCIAL_SERVICES = 'Financial Services',
+  REAL_ESTATE = 'Real Estate',
+  TECHNOLOGY = 'Technology',
+  MANUFACTURING = 'Manufacturing',
+}
+
+export interface FinancialSituation {
+  currentSavings: number | '';
+  monthlyExpenses: number | '';
+  existingInvestments: number | '';
+}
+
+export interface InvestmentPreferences {
+  sectors: Sector[];
+  esgPreference: boolean;
+  localInternationalSplit: number; // 0-100, where 0 is all international, 100 is all local
+}
+
 export interface UserProfile {
+  country: Country;
   age: number | '';
   income: number | '';
+  investmentAmount: number | '';
   horizon: number | '';
   riskTolerance: RiskTolerance;
   primaryGoal: PrimaryGoal;
+  financialSituation: FinancialSituation;
+  preferences: InvestmentPreferences;
 }
 
 export interface AssetAllocation {
   category: string;
-  allocation: string; 
+  allocation: string;
   reason: string;
 }
 
