@@ -107,8 +107,24 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    const jsonText = response.text.trim();
-    const portfolioData: PortfolioRecommendation = JSON.parse(jsonText);
+    if (!response || !response.text) {
+      console.error("Empty response from AI:", response);
+      return NextResponse.json(
+        { error: 'Empty response from AI' },
+        { status: 502 }
+      );
+    }
+    const jsonText = String(response.text).trim();
+    let portfolioData: PortfolioRecommendation;
+    try {
+      portfolioData = JSON.parse(jsonText);
+    } catch (err) {
+      console.error("Failed to parse AI JSON response:", err, jsonText);
+      return NextResponse.json(
+        { error: 'Invalid JSON received from AI' },
+        { status: 502 }
+      );
+    }
 
     // Sanitize allocation strings to ensure they contain '%'
     portfolioData.recommended_portfolio.forEach(asset => {
