@@ -33,4 +33,30 @@ export interface PortfolioRecommendation {
   estimated_risk_level: string;
   rebalancing_tip: string;
   narrative_summary: string;
+  citations?: Citation[];
+  searchQueries?: string[];
 }
+
+export interface Citation {
+  uri: string;
+  title: string;
+}
+
+export interface GroundingMetadata {
+  webSearchQueries?: string[];
+  groundingChunks?: Array<{
+    web?: {
+      uri: string;
+      title: string;
+    };
+  }>;
+  groundingSupports?: Array<{
+    segment?: {
+      startIndex: number;
+      endIndex: number;
+      text: string;
+    };
+    groundingChunkIndices?: number[];
+  }>;
+}
+
