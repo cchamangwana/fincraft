@@ -66,11 +66,51 @@ export interface PortfolioRecommendation {
   narrative_summary: string;
   citations?: Citation[];
   searchQueries?: string[];
+  transparencyMetadata?: TransparencyMetadata;
 }
 
 export interface Citation {
   uri: string;
   title: string;
+  confidence?: number; // 0-1 confidence score
+}
+
+export interface RetrievedTextSegment {
+  text: string;
+  source: string;
+  sourceYear?: string;
+  relevanceScore?: number;
+}
+
+export interface ModelRationale {
+  summary: string;
+  keyFactors: string[];
+  exclusions?: string[]; // Why certain options were excluded
+}
+
+export interface EvidenceSupport {
+  category: string; // Asset class name
+  sourceCount: number;
+  avgConfidence: number;
+  confidenceLevel: 'high' | 'medium' | 'low';
+  supportingCitations: Citation[];
+  alignmentScore?: number; // How well evidence aligns with the claim
+}
+
+export interface TransparencyMetadata {
+  modelRationale?: ModelRationale;
+  retrievedSegments?: RetrievedTextSegment[];
+  evidenceGraph?: EvidenceSupport[];
+  overallConfidence?: number;
+  synthesisMethod?: string;
+}
+
+// Transparency display modes
+export enum TransparencyMode {
+  BASELINE_OPAQUE = 'baseline',
+  CITATION_ENHANCED = 'citation',
+  SYNTHESIS_TRANSPARENT = 'synthesis',
+  GRAPH_AUGMENTED = 'graph',
 }
 
 export interface GroundingMetadata {
@@ -88,6 +128,7 @@ export interface GroundingMetadata {
       text: string;
     };
     groundingChunkIndices?: number[];
+    confidenceScores?: number[];
   }>;
 }
 

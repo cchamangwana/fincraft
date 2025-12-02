@@ -1,8 +1,10 @@
 'use client';
 
-import React, { useMemo } from 'react';
-import { PortfolioRecommendation, UserProfile, Country } from '@/types';
+import React, { useMemo, useState } from 'react';
+import { PortfolioRecommendation, UserProfile, Country, TransparencyMode } from '@/types';
 import Card from '@/components/ui/Card';
+import TransparencyModeSelector from '@/components/TransparencyModeSelector';
+import EvidenceGraph from '@/components/EvidenceGraph';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 interface PortfolioResultProps {
@@ -26,6 +28,7 @@ const CustomTooltip: React.FC<any> = ({ active, payload }) => {
 };
 
 const PortfolioResult: React.FC<PortfolioResultProps> = ({ portfolio, userProfile, isLoading, error }) => {
+  const [transparencyMode, setTransparencyMode] = useState<TransparencyMode>(TransparencyMode.CITATION_ENHANCED);
 
   // Get currency symbol based on user's country
   const currencySymbol = useMemo(() => {
@@ -88,6 +91,12 @@ const PortfolioResult: React.FC<PortfolioResultProps> = ({ portfolio, userProfil
 
     return (
       <div className="space-y-6">
+        {/* Transparency Mode Selector */}
+        <TransparencyModeSelector
+          selectedMode={transparencyMode}
+          onModeChange={setTransparencyMode}
+        />
+
         <div>
           <h3 className="text-lg font-medium text-text-primary">Portfolio Summary</h3>
           <p className="mt-1 text-sm text-text-secondary">{portfolio.narrative_summary}</p>
@@ -158,8 +167,11 @@ const PortfolioResult: React.FC<PortfolioResultProps> = ({ portfolio, userProfil
           </div>
         </div>
 
-        {/* Citations Section - Display Google Search Grounding Sources */}
-        {portfolio.citations && portfolio.citations.length > 0 && (
+        {/* ============================================ */}
+        {/* TRANSPARENCY MODE: CITATION-ENHANCED */}
+        {/* Shows sources with confidence indicators */}
+        {/* ============================================ */}
+        {transparencyMode === TransparencyMode.CITATION_ENHANCED && portfolio.citations && portfolio.citations.length > 0 && (
           <div className="bg-green-50 border border-green-200 p-4 rounded-lg">
             <div className="flex items-center gap-2 mb-3">
               <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -179,23 +191,170 @@ const PortfolioResult: React.FC<PortfolioResultProps> = ({ portfolio, userProfil
               <p className="text-xs font-semibold text-green-800 uppercase tracking-wide">Sources:</p>
               <ul className="space-y-1">
                 {portfolio.citations.map((citation, index) => (
-                  <li key={index} className="text-sm">
+                  <li key={index} className="text-sm flex items-center gap-2">
                     <a
                       href={citation.uri}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1"
+                      className="text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1 flex-1"
                     >
                       <span>[{index + 1}]</span>
-                      <span>{citation.title}</span>
-                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <span className="truncate">{citation.title}</span>
+                      <svg className="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                       </svg>
                     </a>
+                    {citation.confidence !== undefined && (
+                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                        citation.confidence >= 0.85 ? 'bg-green-100 text-green-800' :
+                        citation.confidence >= 0.7 ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-red-100 text-red-800'
+                      }`}>
+                        {(citation.confidence * 100).toFixed(0)}%
+                      </span>
+                    )}
                   </li>
                 ))}
               </ul>
             </div>
+          </div>
+        )}
+
+        {/* ============================================ */}
+        {/* TRANSPARENCY MODE: SYNTHESIS-TRANSPARENT */}
+        {/* Shows model rationale and retrieved text segments */}
+        {/* ============================================ */}
+        {transparencyMode === TransparencyMode.SYNTHESIS_TRANSPARENT && (
+          <>
+            {/* Model Rationale Section */}
+            {portfolio.transparencyMetadata?.modelRationale && (
+              <div className="bg-purple-50 border border-purple-200 p-4 rounded-lg">
+                <div className="flex items-center gap-2 mb-3">
+                  <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                  </svg>
+                  <h4 className="font-bold text-purple-800">Model Rationale</h4>
+                </div>
+                <p className="text-sm text-purple-900 mb-3">
+                  {portfolio.transparencyMetadata.modelRationale.summary}
+                </p>
+                
+                {/* Key Factors */}
+                {portfolio.transparencyMetadata.modelRationale.keyFactors.length > 0 && (
+                  <div className="mb-3">
+                    <p className="text-xs font-semibold text-purple-800 uppercase tracking-wide mb-2">Key Factors Considered:</p>
+                    <ul className="space-y-1">
+                      {portfolio.transparencyMetadata.modelRationale.keyFactors.map((factor, idx) => (
+                        <li key={idx} className="text-sm text-purple-700 flex items-start gap-2">
+                          <svg className="w-4 h-4 text-purple-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4" />
+                          </svg>
+                          <span>{factor}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Exclusions */}
+                {portfolio.transparencyMetadata.modelRationale.exclusions && 
+                 portfolio.transparencyMetadata.modelRationale.exclusions.length > 0 && (
+                  <div>
+                    <p className="text-xs font-semibold text-purple-800 uppercase tracking-wide mb-2">Alternatives Excluded:</p>
+                    <ul className="space-y-1">
+                      {portfolio.transparencyMetadata.modelRationale.exclusions.map((exclusion, idx) => (
+                        <li key={idx} className="text-sm text-purple-600 flex items-start gap-2">
+                          <svg className="w-4 h-4 text-purple-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                          <span>{exclusion}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Retrieved Text Segments */}
+            {portfolio.transparencyMetadata?.retrievedSegments && 
+             portfolio.transparencyMetadata.retrievedSegments.length > 0 && (
+              <div className="bg-amber-50 border border-amber-200 p-4 rounded-lg">
+                <div className="flex items-center gap-2 mb-3">
+                  <svg className="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
+                  </svg>
+                  <h4 className="font-bold text-amber-800">Key Retrieved Text Segments</h4>
+                </div>
+                <p className="text-sm text-amber-700 mb-3">
+                  These are key excerpts from source documents that informed the recommendation.
+                </p>
+                <div className="space-y-3">
+                  {portfolio.transparencyMetadata.retrievedSegments.slice(0, 5).map((segment, idx) => (
+                    <div key={idx} className="bg-white p-3 rounded border border-amber-100">
+                      <p className="text-sm text-gray-700 italic mb-2">"{segment.text}"</p>
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-amber-600 font-medium">
+                          — {segment.source}{segment.sourceYear ? ` (${segment.sourceYear})` : ''}
+                        </span>
+                        {segment.relevanceScore !== undefined && (
+                          <span className="text-xs text-text-secondary">
+                            Relevance: {(segment.relevanceScore * 100).toFixed(0)}%
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Citations for synthesis mode too */}
+            {portfolio.citations && portfolio.citations.length > 0 && (
+              <div className="bg-gray-50 border border-gray-200 p-4 rounded-lg">
+                <p className="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-2">All Sources Referenced:</p>
+                <ul className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                  {portfolio.citations.map((citation, index) => (
+                    <li key={index} className="text-sm">
+                      <a
+                        href={citation.uri}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1"
+                      >
+                        <span>[{index + 1}]</span>
+                        <span className="truncate">{citation.title}</span>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </>
+        )}
+
+        {/* ============================================ */}
+        {/* TRANSPARENCY MODE: GRAPH-AUGMENTED */}
+        {/* Shows visual evidence strength graph */}
+        {/* ============================================ */}
+        {transparencyMode === TransparencyMode.GRAPH_AUGMENTED && 
+         portfolio.transparencyMetadata?.evidenceGraph && (
+          <EvidenceGraph
+            evidenceData={portfolio.transparencyMetadata.evidenceGraph}
+            overallConfidence={portfolio.transparencyMetadata.overallConfidence}
+          />
+        )}
+
+        {/* ============================================ */}
+        {/* BASELINE OPAQUE MODE - No additional info */}
+        {/* Just shows the basic recommendation */}
+        {/* ============================================ */}
+        {transparencyMode === TransparencyMode.BASELINE_OPAQUE && (
+          <div className="bg-gray-50 border border-gray-200 p-4 rounded-lg">
+            <p className="text-sm text-text-secondary italic">
+              Showing baseline view without source attribution or reasoning details.
+              Select a different transparency level to see supporting evidence.
+            </p>
           </div>
         )}
 
