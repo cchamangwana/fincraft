@@ -210,20 +210,71 @@ export async function POST(request: NextRequest) {
       // Try to parse the entire response as JSON first
       portfolioData = JSON.parse(jsonText);
     } catch (err) {
-      // If that fails, try to extract JSON from markdown code blocks
-      const jsonMatch = jsonText.match(/```(?:json)?\s*(\{[\s\S]*?\})\s*```/);
-      if (jsonMatch) {
+      // If that fails, try to extract JSON from markdown code blocks or find JSON object
+      let extractedJson = '';
+
+      // Try to find JSON in markdown code blocks
+      const codeBlockMatch = jsonText.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+      if (codeBlockMatch) {
+        extractedJson = codeBlockMatch[1].trim();
+      } else {
+        // Try to find JSON object by looking for first { and matching closing }
+        const firstBrace = jsonText.indexOf('{');
+        if (firstBrace !== -1) {
+          let braceCount = 0;
+          let inString = false;
+          let escapeNext = false;
+          let endPos = -1;
+
+          for (let i = firstBrace; i < jsonText.length; i++) {
+            const char = jsonText[i];
+
+            if (escapeNext) {
+              escapeNext = false;
+              continue;
+            }
+
+            if (char === '\\') {
+              escapeNext = true;
+              continue;
+            }
+
+            if (char === '"') {
+              inString = !inString;
+              continue;
+            }
+
+            if (!inString) {
+              if (char === '{') braceCount++;
+              if (char === '}') braceCount--;
+
+              if (braceCount === 0) {
+                endPos = i + 1;
+                break;
+              }
+            }
+          }
+
+          if (endPos > firstBrace) {
+            extractedJson = jsonText.substring(firstBrace, endPos);
+          }
+        }
+      }
+
+      if (extractedJson) {
         try {
-          portfolioData = JSON.parse(jsonMatch[1]);
+          portfolioData = JSON.parse(extractedJson);
         } catch (parseErr) {
-          console.error("Failed to parse extracted JSON:", parseErr, jsonMatch[1]);
+          console.error("Failed to parse extracted JSON:", parseErr);
+          console.error("Extracted JSON:", extractedJson.substring(0, 500));
           return NextResponse.json(
             { error: 'Invalid JSON received from AI' },
             { status: 502 }
           );
         }
       } else {
-        console.error("Failed to parse AI response as JSON:", err, jsonText);
+        console.error("Failed to find JSON in AI response:", err);
+        console.error("Response text:", jsonText.substring(0, 500));
         return NextResponse.json(
           { error: 'Invalid JSON received from AI' },
           { status: 502 }
