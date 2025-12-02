@@ -1,6 +1,27 @@
 'use client';
 
 import React, { useMemo, useState } from 'react';
+import {
+  Box,
+  Flex,
+  Grid,
+  GridItem,
+  Heading,
+  Link,
+  List,
+  ListItem,
+  Spinner,
+  Table,
+  Tbody,
+  Td,
+  Text,
+  Th,
+  Thead,
+  Tr,
+  VStack,
+  Icon,
+  Badge,
+} from '@chakra-ui/react';
 import { PortfolioRecommendation, UserProfile, Country, TransparencyMode } from '@/types';
 import Card from '@/components/ui/Card';
 import TransparencyModeSelector from '@/components/TransparencyModeSelector';
@@ -19,9 +40,9 @@ const COLORS = ['#1e3a8a', '#3b82f6', '#10b981', '#f59e0b', '#6366f1', '#ec4899'
 const CustomTooltip: React.FC<any> = ({ active, payload }) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-white p-2 border border-gray-300 rounded-md shadow-lg">
-        <p className="font-bold">{`${payload[0].name}: ${payload[0].value}%`}</p>
-      </div>
+      <Box bg="white" p={2} border="1px" borderColor="gray.300" borderRadius="md">
+        <Text fontWeight="bold">{`${payload[0].name}: ${payload[0].value}%`}</Text>
+      </Box>
     );
   }
   return null;
@@ -61,283 +82,307 @@ const PortfolioResult: React.FC<PortfolioResultProps> = ({ portfolio, userProfil
   const renderContent = () => {
     if (isLoading) {
       return (
-        <div className="flex flex-col items-center justify-center h-full min-h-[400px]">
-          <svg className="animate-spin h-10 w-10 text-brand-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-          </svg>
-          <p className="mt-4 text-text-secondary">Analyzing your profile and market data...</p>
-        </div>
+        <Flex direction="column" align="center" justify="center" minH="400px">
+          <Spinner size="xl" color="brand.primary" thickness="4px" />
+          <Text mt={4} color="text.secondary">Analyzing your profile and market data...</Text>
+        </Flex>
       );
     }
 
     if (error) {
       return (
-        <div className="flex flex-col items-center justify-center text-center h-full min-h-[400px] bg-red-50 p-4 rounded-lg">
-          <p className="text-red-600 font-semibold">Error</p>
-          <p className="text-red-500 mt-2">{error}</p>
-        </div>
+        <Flex direction="column" align="center" justify="center" textAlign="center" minH="400px" bg="red.50" p={4} borderRadius="lg">
+          <Text color="red.600" fontWeight="semibold">Error</Text>
+          <Text color="red.500" mt={2}>{error}</Text>
+        </Flex>
       );
     }
 
     if (!portfolio) {
       return (
-        <div className="flex flex-col items-center justify-center text-center h-full min-h-[400px] bg-gray-50 p-4 rounded-lg">
-          <h3 className="text-lg font-medium text-text-primary">Ready to Build Your Future?</h3>
-          <p className="mt-2 text-text-secondary">Fill out your investment profile to get a personalized portfolio recommendation from FinCraft AI.</p>
-        </div>
-      )
+        <Flex direction="column" align="center" justify="center" textAlign="center" minH="400px" bg="gray.50" p={4} borderRadius="lg">
+          <Heading as="h3" size="md" color="text.primary">Ready to Build Your Future?</Heading>
+          <Text mt={2} color="text.secondary">Fill out your investment profile to get a personalized portfolio recommendation from FinCraft AI.</Text>
+        </Flex>
+      );
     }
 
     return (
-      <div className="space-y-6">
+      <VStack spacing={6} align="stretch">
         {/* Transparency Mode Selector */}
         <TransparencyModeSelector
           selectedMode={transparencyMode}
           onModeChange={setTransparencyMode}
         />
 
-        <div>
-          <h3 className="text-lg font-medium text-text-primary">Portfolio Summary</h3>
-          <p className="mt-1 text-sm text-text-secondary">{portfolio.narrative_summary}</p>
-        </div>
+        <Box>
+          <Heading as="h3" size="md" color="text.primary">Portfolio Summary</Heading>
+          <Text mt={1} fontSize="sm" color="text.secondary">{portfolio.narrative_summary}</Text>
+        </Box>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-          <div className="bg-base-200 p-4 rounded-lg">
-            <p className="text-sm font-medium text-text-secondary">Expected Return</p>
-            <p className="text-xl font-bold text-brand-accent">{portfolio.expected_return}</p>
-          </div>
-          <div className="bg-base-200 p-4 rounded-lg">
-            <p className="text-sm font-medium text-text-secondary">Risk Level</p>
-            <p className="text-xl font-bold text-text-primary">{portfolio.estimated_risk_level}</p>
-          </div>
-          <div className="bg-base-200 p-4 rounded-lg">
-            <p className="text-sm font-medium text-text-secondary">Horizon</p>
-            <p className="text-xl font-bold text-text-primary">{portfolio.investment_horizon}</p>
-          </div>
-        </div>
+        <Grid templateColumns={{ base: '1fr', md: 'repeat(3, 1fr)' }} gap={4} textAlign="center">
+          <GridItem bg="base.200" p={4} borderRadius="lg">
+            <Text fontSize="sm" fontWeight="medium" color="text.secondary">Expected Return</Text>
+            <Text fontSize="xl" fontWeight="bold" color="brand.accent">{portfolio.expected_return}</Text>
+          </GridItem>
+          <GridItem bg="base.200" p={4} borderRadius="lg">
+            <Text fontSize="sm" fontWeight="medium" color="text.secondary">Risk Level</Text>
+            <Text fontSize="xl" fontWeight="bold" color="text.primary">{portfolio.estimated_risk_level}</Text>
+          </GridItem>
+          <GridItem bg="base.200" p={4} borderRadius="lg">
+            <Text fontSize="sm" fontWeight="medium" color="text.secondary">Horizon</Text>
+            <Text fontSize="xl" fontWeight="bold" color="text.primary">{portfolio.investment_horizon}</Text>
+          </GridItem>
+        </Grid>
 
-        <div className="h-64 md:h-80 w-full">
+        <Box h={{ base: 64, md: 80 }} w="full">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
-              <Pie data={chartData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={100} fill="#8884d8" labelLine={false} label={({ cx, cy, midAngle, innerRadius, outerRadius, percent }) => {
-                const radius = innerRadius + (outerRadius - innerRadius) * 1.2;
-                const x = cx + radius * Math.cos(-midAngle * Math.PI / 180);
-                const y = cy + radius * Math.sin(-midAngle * Math.PI / 180);
-                return <text x={x} y={y} fill="black" textAnchor={x > cx ? 'start' : 'end'} dominantBaseline="central" fontSize="12">
-                  {`${(percent * 100).toFixed(0)}%`}
-                </text>
-              }}>
+              <Pie
+                data={chartData}
+                dataKey="value"
+                nameKey="name"
+                cx="50%"
+                cy="50%"
+                outerRadius={100}
+                fill="#8884d8"
+                labelLine={false}
+                label={({ cx, cy, midAngle, innerRadius, outerRadius, percent }) => {
+                  const radius = innerRadius + (outerRadius - innerRadius) * 1.2;
+                  const x = cx + radius * Math.cos(-midAngle * Math.PI / 180);
+                  const y = cy + radius * Math.sin(-midAngle * Math.PI / 180);
+                  return <text x={x} y={y} fill="black" textAnchor={x > cx ? 'start' : 'end'} dominantBaseline="central" fontSize="12">
+                    {`${(percent * 100).toFixed(0)}%`}
+                  </text>
+                }}
+              >
                 {chartData.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
               </Pie>
               <Tooltip content={<CustomTooltip />} />
               <Legend />
             </PieChart>
           </ResponsiveContainer>
-        </div>
+        </Box>
 
-        <div>
-          <h3 className="text-lg font-medium text-text-primary mb-2">Allocation Breakdown</h3>
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Asset Class</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Allocation</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">Reasoning</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+        <Box>
+          <Heading as="h3" size="md" color="text.primary" mb={2}>Allocation Breakdown</Heading>
+          <Box overflowX="auto">
+            <Table variant="simple">
+              <Thead bg="gray.50">
+                <Tr>
+                  <Th fontSize="xs" fontWeight="medium" color="text.secondary" textTransform="uppercase">Asset Class</Th>
+                  <Th fontSize="xs" fontWeight="medium" color="text.secondary" textTransform="uppercase">Allocation</Th>
+                  <Th fontSize="xs" fontWeight="medium" color="text.secondary" textTransform="uppercase">Reasoning</Th>
+                </Tr>
+              </Thead>
+              <Tbody bg="white">
                 {portfolio.recommended_portfolio.map((asset, index) => (
-                  <tr key={index}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-text-primary">{asset.category}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-text-secondary">
+                  <Tr key={index} borderBottom="1px" borderColor="gray.200">
+                    <Td fontSize="sm" fontWeight="medium" color="text.primary">{asset.category}</Td>
+                    <Td fontSize="sm" color="text.secondary">
                       {asset.allocation}
                       {calculateAmount(asset.allocation) && (
-                        <span className="block text-xs text-brand-accent font-semibold mt-1">
+                        <Text display="block" fontSize="xs" color="brand.accent" fontWeight="semibold" mt={1}>
                           {currencySymbol} {calculateAmount(asset.allocation)}
-                        </span>
+                        </Text>
                       )}
-                    </td>
-                    <td className="px-6 py-4 whitespace-normal text-sm text-text-secondary">{asset.reason}</td>
-                  </tr>
+                    </Td>
+                    <Td fontSize="sm" color="text.secondary">{asset.reason}</Td>
+                  </Tr>
                 ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+              </Tbody>
+            </Table>
+          </Box>
+        </Box>
 
-        {/* ============================================ */}
         {/* TRANSPARENCY MODE: CITATION-ENHANCED */}
-        {/* Shows sources with confidence indicators */}
-        {/* ============================================ */}
         {transparencyMode === TransparencyMode.CITATION_ENHANCED && portfolio.citations && portfolio.citations.length > 0 && (
-          <div className="bg-green-50 border border-green-200 p-4 rounded-lg">
-            <div className="flex items-center gap-2 mb-3">
-              <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <h4 className="font-bold text-green-800">Grounded in Real-Time Data</h4>
-            </div>
-            <p className="text-sm text-green-700 mb-3">
+          <Box bg="green.50" border="1px" borderColor="green.200" p={4} borderRadius="lg">
+            <Flex align="center" gap={2} mb={3}>
+              <Icon boxSize={5} color="green.600">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </Icon>
+              <Heading as="h4" size="sm" fontWeight="bold" color="green.800">Grounded in Real-Time Data</Heading>
+            </Flex>
+            <Text fontSize="sm" color="green.700" mb={3}>
               This portfolio recommendation is based on current market data from Google Search.
               {portfolio.searchQueries && portfolio.searchQueries.length > 0 && (
-                <span className="block mt-2 text-xs italic">
+                <Text as="span" display="block" mt={2} fontSize="xs" fontStyle="italic">
                   Search queries: {portfolio.searchQueries.join(', ')}
-                </span>
+                </Text>
               )}
-            </p>
-            <div className="space-y-2">
-              <p className="text-xs font-semibold text-green-800 uppercase tracking-wide">Sources:</p>
-              <ul className="space-y-1">
+            </Text>
+            <Box>
+              <Text fontSize="xs" fontWeight="semibold" color="green.800" textTransform="uppercase" mb={2}>Sources:</Text>
+              <List spacing={1}>
                 {portfolio.citations.map((citation, index) => (
-                  <li key={index} className="text-sm flex items-center gap-2">
-                    <a
-                      href={citation.uri}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1 flex-1"
-                    >
-                      <span>[{index + 1}]</span>
-                      <span className="truncate">{citation.title}</span>
-                      <svg className="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                      </svg>
-                    </a>
-                    {citation.confidence !== undefined && (
-                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                        citation.confidence >= 0.85 ? 'bg-green-100 text-green-800' :
-                        citation.confidence >= 0.7 ? 'bg-yellow-100 text-yellow-800' :
-                        'bg-red-100 text-red-800'
-                      }`}>
-                        {(citation.confidence * 100).toFixed(0)}%
-                      </span>
-                    )}
-                  </li>
+                  <ListItem key={index} fontSize="sm">
+                    <Flex align="center" gap={2}>
+                      <Link
+                        href={citation.uri}
+                        isExternal
+                        color="blue.600"
+                        _hover={{ color: 'blue.800', textDecoration: 'underline' }}
+                        flex={1}
+                      >
+                        <Flex align="center" gap={1}>
+                          <Text>[{index + 1}]</Text>
+                          <Text isTruncated>{citation.title}</Text>
+                          <Icon boxSize={3}>
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                            </svg>
+                          </Icon>
+                        </Flex>
+                      </Link>
+                      {citation.confidence !== undefined && (
+                        <Badge
+                          colorScheme={
+                            citation.confidence >= 0.85 ? 'green' :
+                            citation.confidence >= 0.7 ? 'yellow' :
+                            'red'
+                          }
+                          fontSize="xs"
+                        >
+                          {(citation.confidence * 100).toFixed(0)}%
+                        </Badge>
+                      )}
+                    </Flex>
+                  </ListItem>
                 ))}
-              </ul>
-            </div>
-          </div>
+              </List>
+            </Box>
+          </Box>
         )}
 
-        {/* ============================================ */}
         {/* TRANSPARENCY MODE: SYNTHESIS-TRANSPARENT */}
-        {/* Shows model rationale and retrieved text segments */}
-        {/* ============================================ */}
         {transparencyMode === TransparencyMode.SYNTHESIS_TRANSPARENT && (
           <>
             {/* Model Rationale Section */}
             {portfolio.transparencyMetadata?.modelRationale && (
-              <div className="bg-purple-50 border border-purple-200 p-4 rounded-lg">
-                <div className="flex items-center gap-2 mb-3">
-                  <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                  </svg>
-                  <h4 className="font-bold text-purple-800">Model Rationale</h4>
-                </div>
-                <p className="text-sm text-purple-900 mb-3">
+              <Box bg="purple.50" border="1px" borderColor="purple.200" p={4} borderRadius="lg">
+                <Flex align="center" gap={2} mb={3}>
+                  <Icon boxSize={5} color="purple.600">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                    </svg>
+                  </Icon>
+                  <Heading as="h4" size="sm" fontWeight="bold" color="purple.800">Model Rationale</Heading>
+                </Flex>
+                <Text fontSize="sm" color="purple.900" mb={3}>
                   {portfolio.transparencyMetadata.modelRationale.summary}
-                </p>
-                
+                </Text>
+
                 {/* Key Factors */}
                 {portfolio.transparencyMetadata.modelRationale.keyFactors.length > 0 && (
-                  <div className="mb-3">
-                    <p className="text-xs font-semibold text-purple-800 uppercase tracking-wide mb-2">Key Factors Considered:</p>
-                    <ul className="space-y-1">
+                  <Box mb={3}>
+                    <Text fontSize="xs" fontWeight="semibold" color="purple.800" textTransform="uppercase" mb={2}>Key Factors Considered:</Text>
+                    <List spacing={1}>
                       {portfolio.transparencyMetadata.modelRationale.keyFactors.map((factor, idx) => (
-                        <li key={idx} className="text-sm text-purple-700 flex items-start gap-2">
-                          <svg className="w-4 h-4 text-purple-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4" />
-                          </svg>
-                          <span>{factor}</span>
-                        </li>
+                        <ListItem key={idx} fontSize="sm" color="purple.700">
+                          <Flex align="flex-start" gap={2}>
+                            <Icon boxSize={4} color="purple.500" mt={0.5}>
+                              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4" />
+                              </svg>
+                            </Icon>
+                            <Text>{factor}</Text>
+                          </Flex>
+                        </ListItem>
                       ))}
-                    </ul>
-                  </div>
+                    </List>
+                  </Box>
                 )}
 
                 {/* Exclusions */}
-                {portfolio.transparencyMetadata.modelRationale.exclusions && 
+                {portfolio.transparencyMetadata.modelRationale.exclusions &&
                  portfolio.transparencyMetadata.modelRationale.exclusions.length > 0 && (
-                  <div>
-                    <p className="text-xs font-semibold text-purple-800 uppercase tracking-wide mb-2">Alternatives Excluded:</p>
-                    <ul className="space-y-1">
+                  <Box>
+                    <Text fontSize="xs" fontWeight="semibold" color="purple.800" textTransform="uppercase" mb={2}>Alternatives Excluded:</Text>
+                    <List spacing={1}>
                       {portfolio.transparencyMetadata.modelRationale.exclusions.map((exclusion, idx) => (
-                        <li key={idx} className="text-sm text-purple-600 flex items-start gap-2">
-                          <svg className="w-4 h-4 text-purple-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                          </svg>
-                          <span>{exclusion}</span>
-                        </li>
+                        <ListItem key={idx} fontSize="sm" color="purple.600">
+                          <Flex align="flex-start" gap={2}>
+                            <Icon boxSize={4} color="purple.400" mt={0.5}>
+                              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                              </svg>
+                            </Icon>
+                            <Text>{exclusion}</Text>
+                          </Flex>
+                        </ListItem>
                       ))}
-                    </ul>
-                  </div>
+                    </List>
+                  </Box>
                 )}
-              </div>
+              </Box>
             )}
 
             {/* Retrieved Text Segments */}
-            {portfolio.transparencyMetadata?.retrievedSegments && 
+            {portfolio.transparencyMetadata?.retrievedSegments &&
              portfolio.transparencyMetadata.retrievedSegments.length > 0 && (
-              <div className="bg-amber-50 border border-amber-200 p-4 rounded-lg">
-                <div className="flex items-center gap-2 mb-3">
-                  <svg className="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
-                  </svg>
-                  <h4 className="font-bold text-amber-800">Key Retrieved Text Segments</h4>
-                </div>
-                <p className="text-sm text-amber-700 mb-3">
+              <Box bg="orange.50" border="1px" borderColor="orange.200" p={4} borderRadius="lg">
+                <Flex align="center" gap={2} mb={3}>
+                  <Icon boxSize={5} color="orange.600">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
+                    </svg>
+                  </Icon>
+                  <Heading as="h4" size="sm" fontWeight="bold" color="orange.800">Key Retrieved Text Segments</Heading>
+                </Flex>
+                <Text fontSize="sm" color="orange.700" mb={3}>
                   These are key excerpts from source documents that informed the recommendation.
-                </p>
-                <div className="space-y-3">
+                </Text>
+                <VStack spacing={3} align="stretch">
                   {portfolio.transparencyMetadata.retrievedSegments.slice(0, 5).map((segment, idx) => (
-                    <div key={idx} className="bg-white p-3 rounded border border-amber-100">
-                      <p className="text-sm text-gray-700 italic mb-2">"{segment.text}"</p>
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs text-amber-600 font-medium">
+                    <Box key={idx} bg="white" p={3} borderRadius="md" border="1px" borderColor="orange.100">
+                      <Text fontSize="sm" color="gray.700" fontStyle="italic" mb={2}>"{segment.text}"</Text>
+                      <Flex align="center" justify="space-between">
+                        <Text fontSize="xs" color="orange.600" fontWeight="medium">
                           — {segment.source}{segment.sourceYear ? ` (${segment.sourceYear})` : ''}
-                        </span>
+                        </Text>
                         {segment.relevanceScore !== undefined && (
-                          <span className="text-xs text-text-secondary">
+                          <Text fontSize="xs" color="text.secondary">
                             Relevance: {(segment.relevanceScore * 100).toFixed(0)}%
-                          </span>
+                          </Text>
                         )}
-                      </div>
-                    </div>
+                      </Flex>
+                    </Box>
                   ))}
-                </div>
-              </div>
+                </VStack>
+              </Box>
             )}
 
             {/* Citations for synthesis mode too */}
             {portfolio.citations && portfolio.citations.length > 0 && (
-              <div className="bg-gray-50 border border-gray-200 p-4 rounded-lg">
-                <p className="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-2">All Sources Referenced:</p>
-                <ul className="grid grid-cols-1 md:grid-cols-2 gap-2">
+              <Box bg="gray.50" border="1px" borderColor="gray.200" p={4} borderRadius="lg">
+                <Text fontSize="xs" fontWeight="semibold" color="gray.600" textTransform="uppercase" mb={2}>All Sources Referenced:</Text>
+                <Grid templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)' }} gap={2}>
                   {portfolio.citations.map((citation, index) => (
-                    <li key={index} className="text-sm">
-                      <a
+                    <GridItem key={index} fontSize="sm">
+                      <Link
                         href={citation.uri}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1"
+                        isExternal
+                        color="blue.600"
+                        _hover={{ color: 'blue.800', textDecoration: 'underline' }}
                       >
-                        <span>[{index + 1}]</span>
-                        <span className="truncate">{citation.title}</span>
-                      </a>
-                    </li>
+                        <Flex align="center" gap={1}>
+                          <Text>[{index + 1}]</Text>
+                          <Text isTruncated>{citation.title}</Text>
+                        </Flex>
+                      </Link>
+                    </GridItem>
                   ))}
-                </ul>
-              </div>
+                </Grid>
+              </Box>
             )}
           </>
         )}
 
-        {/* ============================================ */}
         {/* TRANSPARENCY MODE: GRAPH-AUGMENTED */}
-        {/* Shows visual evidence strength graph */}
-        {/* ============================================ */}
-        {transparencyMode === TransparencyMode.GRAPH_AUGMENTED && 
+        {transparencyMode === TransparencyMode.GRAPH_AUGMENTED &&
          portfolio.transparencyMetadata?.evidenceGraph && (
           <EvidenceGraph
             evidenceData={portfolio.transparencyMetadata.evidenceGraph}
@@ -345,24 +390,21 @@ const PortfolioResult: React.FC<PortfolioResultProps> = ({ portfolio, userProfil
           />
         )}
 
-        {/* ============================================ */}
-        {/* BASELINE OPAQUE MODE - No additional info */}
-        {/* Just shows the basic recommendation */}
-        {/* ============================================ */}
+        {/* BASELINE OPAQUE MODE */}
         {transparencyMode === TransparencyMode.BASELINE_OPAQUE && (
-          <div className="bg-gray-50 border border-gray-200 p-4 rounded-lg">
-            <p className="text-sm text-text-secondary italic">
+          <Box bg="gray.50" border="1px" borderColor="gray.200" p={4} borderRadius="lg">
+            <Text fontSize="sm" color="text.secondary" fontStyle="italic">
               Showing baseline view without source attribution or reasoning details.
               Select a different transparency level to see supporting evidence.
-            </p>
-          </div>
+            </Text>
+          </Box>
         )}
 
-        <div className="bg-blue-50 border-l-4 border-brand-secondary p-4 rounded-r-lg">
-          <h4 className="font-bold text-brand-primary">Rebalancing Tip</h4>
-          <p className="mt-1 text-sm text-text-secondary">{portfolio.rebalancing_tip}</p>
-        </div>
-      </div>
+        <Box bg="blue.50" borderLeft="4px" borderColor="brand.secondary" p={4} borderRightRadius="lg">
+          <Heading as="h4" size="sm" fontWeight="bold" color="brand.primary">Rebalancing Tip</Heading>
+          <Text mt={1} fontSize="sm" color="text.secondary">{portfolio.rebalancing_tip}</Text>
+        </Box>
+      </VStack>
     );
   };
 

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import "./globals.css";
+import { Providers } from './providers';
+import './globals.css';
 
 export const metadata: Metadata = {
   title: "FinCraft AI - Your Personalized Portfolio Architect",
@@ -13,7 +14,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="font-sans antialiased">{children}</body>
+      <body suppressHydrationWarning>
+        <Providers>
+          {children}
+        </Providers>
+      </body>
     </html>
   );
 }

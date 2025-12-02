@@ -1,9 +1,34 @@
 'use client';
 
 import React, { useState, useCallback, useMemo } from 'react';
+import {
+  Box,
+  Button,
+  Checkbox,
+  Flex,
+  FormControl,
+  FormLabel,
+  Grid,
+  GridItem,
+  Heading,
+  Input,
+  RangeSlider,
+  RangeSliderTrack,
+  RangeSliderFilledTrack,
+  RangeSliderThumb,
+  Select,
+  Slider,
+  SliderTrack,
+  SliderFilledTrack,
+  SliderThumb,
+  Spinner,
+  Text,
+  Textarea,
+  VStack,
+  Icon,
+} from '@chakra-ui/react';
 import { UserProfile, RiskTolerance, PrimaryGoal, Country, Sector } from '@/types';
 import Card from '@/components/ui/Card';
-import UploadIcon from '@/components/icons/UploadIcon';
 import WandIcon from '@/components/icons/WandIcon';
 
 interface PortfolioFormProps {
@@ -99,293 +124,326 @@ const PortfolioForm: React.FC<PortfolioFormProps> = ({ onSubmit, isLoading }) =>
 
   return (
     <Card>
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Location Section */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-medium border-b pb-2 text-text-primary">Location</h3>
-          <div>
-            <label htmlFor="country" className="block text-sm font-medium text-text-secondary">
-              Country <span className="text-red-500">*</span>
-            </label>
-            <select
-              id="country"
-              value={profile.country}
-              onChange={e => handleProfileChange('country', e.target.value as Country)}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-secondary focus:ring-brand-secondary sm:text-sm"
-              required
-            >
-              {Object.values(Country).map(val => (
-                <option key={val} value={val}>
-                  {val}
-                </option>
-              ))}
-            </select>
-            <p className="mt-1 text-xs text-gray-500">
-              Recommendations will focus on {profile.country === Country.MALAWI ? 'Malawi Stock Exchange (MSE)' : profile.country === Country.BOTSWANA ? 'Botswana Stock Exchange (BSE)' : 'global markets'}
-            </p>
-          </div>
-        </div>
-
-        {/* Personal Details Section */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-medium border-b pb-2 text-text-primary">Your Details</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label htmlFor="age" className="block text-sm font-medium text-text-secondary">Age</label>
-              <input
-                type="number"
-                id="age"
-                value={profile.age}
-                onChange={e => handleProfileChange('age', e.target.value === '' ? '' : parseInt(e.target.value, 10))}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-secondary focus:ring-brand-secondary sm:text-sm"
-                min="18"
-                max="100"
-              />
-            </div>
-            <div>
-              <label htmlFor="income" className="block text-sm font-medium text-text-secondary">
-                Annual Income ({currencySymbol})
-              </label>
-              <input
-                type="number"
-                id="income"
-                value={profile.income}
-                onChange={e => handleProfileChange('income', e.target.value === '' ? '' : parseInt(e.target.value, 10))}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-secondary focus:ring-brand-secondary sm:text-sm"
-                min="0"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Investment Details Section */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-medium border-b pb-2 text-text-primary">Investment Details</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label htmlFor="investmentAmount" className="block text-sm font-medium text-text-secondary">
-                Investment Amount ({currencySymbol})
-              </label>
-              <input
-                type="number"
-                id="investmentAmount"
-                value={profile.investmentAmount}
-                onChange={e => handleProfileChange('investmentAmount', e.target.value === '' ? '' : parseInt(e.target.value, 10))}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-secondary focus:ring-brand-secondary sm:text-sm"
-                min="0"
-                placeholder="How much do you want to invest?"
-              />
-              <p className="mt-1 text-xs text-gray-500">We'll show exact amounts for each allocation</p>
-            </div>
-            <div>
-              <label htmlFor="horizon" className="block text-sm font-medium text-text-secondary">
-                Investment Horizon (Years) <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="number"
-                id="horizon"
-                value={profile.horizon}
-                min="1"
-                max="50"
-                required
-                onChange={e => handleProfileChange('horizon', e.target.value === '' ? '' : parseInt(e.target.value, 10))}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-secondary focus:ring-brand-secondary sm:text-sm"
-              />
-            </div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label htmlFor="riskTolerance" className="block text-sm font-medium text-text-secondary">
-                Risk Tolerance <span className="text-red-500">*</span>
-              </label>
-              <select
-                id="riskTolerance"
-                value={profile.riskTolerance}
-                onChange={e => handleProfileChange('riskTolerance', e.target.value as RiskTolerance)}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-secondary focus:ring-brand-secondary sm:text-sm"
+      <form onSubmit={handleSubmit}>
+        <VStack spacing={6} align="stretch">
+          {/* Location Section */}
+          <Box>
+            <Heading as="h3" size="md" borderBottom="1px" borderColor="gray.200" pb={2} mb={4} color="text.primary">
+              Location
+            </Heading>
+            <FormControl isRequired>
+              <FormLabel fontSize="sm" fontWeight="medium" color="text.secondary">
+                Country <Text as="span" color="red.500">*</Text>
+              </FormLabel>
+              <Select
+                value={profile.country}
+                onChange={e => handleProfileChange('country', e.target.value as Country)}
+                focusBorderColor="brand.secondary"
               >
-                {Object.values(RiskTolerance).map(val => <option key={val} value={val}>{val}</option>)}
-              </select>
-            </div>
-            <div>
-              <label htmlFor="primaryGoal" className="block text-sm font-medium text-text-secondary">
-                Primary Goal <span className="text-red-500">*</span>
-              </label>
-              <select
-                id="primaryGoal"
-                value={profile.primaryGoal}
-                onChange={e => handleProfileChange('primaryGoal', e.target.value as PrimaryGoal)}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-secondary focus:ring-brand-secondary sm:text-sm"
-              >
-                {Object.values(PrimaryGoal).map(val => <option key={val} value={val}>{val}</option>)}
-              </select>
-            </div>
-          </div>
-        </div>
+                {Object.values(Country).map(val => (
+                  <option key={val} value={val}>
+                    {val}
+                  </option>
+                ))}
+              </Select>
+              <Text mt={1} fontSize="xs" color="gray.500">
+                Recommendations will focus on {profile.country === Country.MALAWI ? 'Malawi Stock Exchange (MSE)' : profile.country === Country.BOTSWANA ? 'Botswana Stock Exchange (BSE)' : 'global markets'}
+              </Text>
+            </FormControl>
+          </Box>
 
-        {/* Financial Situation Section */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-medium border-b pb-2 text-text-primary">Financial Situation (Optional)</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label htmlFor="currentSavings" className="block text-sm font-medium text-text-secondary">
-                Current Savings ({currencySymbol})
-              </label>
-              <input
-                type="number"
-                id="currentSavings"
-                value={profile.financialSituation.currentSavings}
-                onChange={e => handleFinancialChange('currentSavings', e.target.value === '' ? '' : parseInt(e.target.value, 10))}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-secondary focus:ring-brand-secondary sm:text-sm"
-                min="0"
-              />
-            </div>
-            <div>
-              <label htmlFor="monthlyExpenses" className="block text-sm font-medium text-text-secondary">
-                Monthly Expenses ({currencySymbol})
-              </label>
-              <input
-                type="number"
-                id="monthlyExpenses"
-                value={profile.financialSituation.monthlyExpenses}
-                onChange={e => handleFinancialChange('monthlyExpenses', e.target.value === '' ? '' : parseInt(e.target.value, 10))}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-secondary focus:ring-brand-secondary sm:text-sm"
-                min="0"
-              />
-            </div>
-            <div>
-              <label htmlFor="existingInvestments" className="block text-sm font-medium text-text-secondary">
-                Existing Investments ({currencySymbol})
-              </label>
-              <input
-                type="number"
-                id="existingInvestments"
-                value={profile.financialSituation.existingInvestments}
-                onChange={e => handleFinancialChange('existingInvestments', e.target.value === '' ? '' : parseInt(e.target.value, 10))}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-secondary focus:ring-brand-secondary sm:text-sm"
-                min="0"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Investment Preferences Section */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-medium border-b pb-2 text-text-primary">Investment Preferences</h3>
-
-          {/* Sector Interests */}
-          <div>
-            <label className="block text-sm font-medium text-text-secondary mb-2">
-              Sectors of Interest (Select all that apply)
-            </label>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-              {Object.values(Sector).map(sector => (
-                <label key={sector} className="flex items-center space-x-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={profile.preferences.sectors.includes(sector)}
-                    onChange={() => handleSectorToggle(sector)}
-                    className="rounded border-gray-300 text-brand-primary focus:ring-brand-secondary"
+          {/* Personal Details Section */}
+          <Box>
+            <Heading as="h3" size="md" borderBottom="1px" borderColor="gray.200" pb={2} mb={4} color="text.primary">
+              Your Details
+            </Heading>
+            <Grid templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)' }} gap={4}>
+              <GridItem>
+                <FormControl>
+                  <FormLabel fontSize="sm" fontWeight="medium" color="text.secondary">Age</FormLabel>
+                  <Input
+                    type="number"
+                    value={profile.age}
+                    onChange={e => handleProfileChange('age', e.target.value === '' ? '' : parseInt(e.target.value, 10))}
+                    focusBorderColor="brand.secondary"
+                    min={18}
+                    max={100}
                   />
-                  <span className="text-sm text-text-secondary">{sector}</span>
-                </label>
-              ))}
-            </div>
-          </div>
+                </FormControl>
+              </GridItem>
+              <GridItem>
+                <FormControl>
+                  <FormLabel fontSize="sm" fontWeight="medium" color="text.secondary">
+                    Annual Income ({currencySymbol})
+                  </FormLabel>
+                  <Input
+                    type="number"
+                    value={profile.income}
+                    onChange={e => handleProfileChange('income', e.target.value === '' ? '' : parseInt(e.target.value, 10))}
+                    focusBorderColor="brand.secondary"
+                    min={0}
+                  />
+                </FormControl>
+              </GridItem>
+            </Grid>
+          </Box>
 
-          {/* ESG Preference */}
-          <div className="flex items-center space-x-3">
-            <input
-              type="checkbox"
-              id="esgPreference"
-              checked={profile.preferences.esgPreference}
+          {/* Investment Details Section */}
+          <Box>
+            <Heading as="h3" size="md" borderBottom="1px" borderColor="gray.200" pb={2} mb={4} color="text.primary">
+              Investment Details
+            </Heading>
+            <Grid templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)' }} gap={4}>
+              <GridItem>
+                <FormControl>
+                  <FormLabel fontSize="sm" fontWeight="medium" color="text.secondary">
+                    Investment Amount ({currencySymbol})
+                  </FormLabel>
+                  <Input
+                    type="number"
+                    value={profile.investmentAmount}
+                    onChange={e => handleProfileChange('investmentAmount', e.target.value === '' ? '' : parseInt(e.target.value, 10))}
+                    focusBorderColor="brand.secondary"
+                    min={0}
+                    placeholder="How much do you want to invest?"
+                  />
+                  <Text mt={1} fontSize="xs" color="gray.500">We'll show exact amounts for each allocation</Text>
+                </FormControl>
+              </GridItem>
+              <GridItem>
+                <FormControl isRequired>
+                  <FormLabel fontSize="sm" fontWeight="medium" color="text.secondary">
+                    Investment Horizon (Years) <Text as="span" color="red.500">*</Text>
+                  </FormLabel>
+                  <Input
+                    type="number"
+                    value={profile.horizon}
+                    min={1}
+                    max={50}
+                    required
+                    onChange={e => handleProfileChange('horizon', e.target.value === '' ? '' : parseInt(e.target.value, 10))}
+                    focusBorderColor="brand.secondary"
+                  />
+                </FormControl>
+              </GridItem>
+            </Grid>
+            <Grid templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)' }} gap={4} mt={4}>
+              <GridItem>
+                <FormControl>
+                  <FormLabel fontSize="sm" fontWeight="medium" color="text.secondary">
+                    Risk Tolerance <Text as="span" color="red.500">*</Text>
+                  </FormLabel>
+                  <Select
+                    value={profile.riskTolerance}
+                    onChange={e => handleProfileChange('riskTolerance', e.target.value as RiskTolerance)}
+                    focusBorderColor="brand.secondary"
+                  >
+                    {Object.values(RiskTolerance).map(val => <option key={val} value={val}>{val}</option>)}
+                  </Select>
+                </FormControl>
+              </GridItem>
+              <GridItem>
+                <FormControl>
+                  <FormLabel fontSize="sm" fontWeight="medium" color="text.secondary">
+                    Primary Goal <Text as="span" color="red.500">*</Text>
+                  </FormLabel>
+                  <Select
+                    value={profile.primaryGoal}
+                    onChange={e => handleProfileChange('primaryGoal', e.target.value as PrimaryGoal)}
+                    focusBorderColor="brand.secondary"
+                  >
+                    {Object.values(PrimaryGoal).map(val => <option key={val} value={val}>{val}</option>)}
+                  </Select>
+                </FormControl>
+              </GridItem>
+            </Grid>
+          </Box>
+
+          {/* Financial Situation Section */}
+          <Box>
+            <Heading as="h3" size="md" borderBottom="1px" borderColor="gray.200" pb={2} mb={4} color="text.primary">
+              Financial Situation (Optional)
+            </Heading>
+            <Grid templateColumns={{ base: '1fr', md: 'repeat(3, 1fr)' }} gap={4}>
+              <GridItem>
+                <FormControl>
+                  <FormLabel fontSize="sm" fontWeight="medium" color="text.secondary">
+                    Current Savings ({currencySymbol})
+                  </FormLabel>
+                  <Input
+                    type="number"
+                    value={profile.financialSituation.currentSavings}
+                    onChange={e => handleFinancialChange('currentSavings', e.target.value === '' ? '' : parseInt(e.target.value, 10))}
+                    focusBorderColor="brand.secondary"
+                    min={0}
+                  />
+                </FormControl>
+              </GridItem>
+              <GridItem>
+                <FormControl>
+                  <FormLabel fontSize="sm" fontWeight="medium" color="text.secondary">
+                    Monthly Expenses ({currencySymbol})
+                  </FormLabel>
+                  <Input
+                    type="number"
+                    value={profile.financialSituation.monthlyExpenses}
+                    onChange={e => handleFinancialChange('monthlyExpenses', e.target.value === '' ? '' : parseInt(e.target.value, 10))}
+                    focusBorderColor="brand.secondary"
+                    min={0}
+                  />
+                </FormControl>
+              </GridItem>
+              <GridItem>
+                <FormControl>
+                  <FormLabel fontSize="sm" fontWeight="medium" color="text.secondary">
+                    Existing Investments ({currencySymbol})
+                  </FormLabel>
+                  <Input
+                    type="number"
+                    value={profile.financialSituation.existingInvestments}
+                    onChange={e => handleFinancialChange('existingInvestments', e.target.value === '' ? '' : parseInt(e.target.value, 10))}
+                    focusBorderColor="brand.secondary"
+                    min={0}
+                  />
+                </FormControl>
+              </GridItem>
+            </Grid>
+          </Box>
+
+          {/* Investment Preferences Section */}
+          <Box>
+            <Heading as="h3" size="md" borderBottom="1px" borderColor="gray.200" pb={2} mb={4} color="text.primary">
+              Investment Preferences
+            </Heading>
+
+            {/* Sector Interests */}
+            <FormControl mb={4}>
+              <FormLabel fontSize="sm" fontWeight="medium" color="text.secondary" mb={2}>
+                Sectors of Interest (Select all that apply)
+              </FormLabel>
+              <Grid templateColumns={{ base: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' }} gap={2}>
+                {Object.values(Sector).map(sector => (
+                  <Checkbox
+                    key={sector}
+                    isChecked={profile.preferences.sectors.includes(sector)}
+                    onChange={() => handleSectorToggle(sector)}
+                    colorScheme="blue"
+                  >
+                    <Text fontSize="sm" color="text.secondary">{sector}</Text>
+                  </Checkbox>
+                ))}
+              </Grid>
+            </FormControl>
+
+            {/* ESG Preference */}
+            <Checkbox
+              isChecked={profile.preferences.esgPreference}
               onChange={e => handlePreferenceChange('esgPreference', e.target.checked)}
-              className="rounded border-gray-300 text-brand-primary focus:ring-brand-secondary h-5 w-5"
-            />
-            <label htmlFor="esgPreference" className="text-sm font-medium text-text-secondary cursor-pointer">
-              Prefer ESG/Sustainable Investments
-            </label>
-          </div>
+              colorScheme="blue"
+              mb={4}
+            >
+              <Text fontSize="sm" fontWeight="medium" color="text.secondary">
+                Prefer ESG/Sustainable Investments
+              </Text>
+            </Checkbox>
 
-          {/* Local vs International Split */}
-          <div>
-            <label htmlFor="localSplit" className="block text-sm font-medium text-text-secondary mb-2">
-              Local vs International Preference: {profile.preferences.localInternationalSplit}% Local
-            </label>
-            <input
-              type="range"
-              id="localSplit"
-              min="0"
-              max="100"
-              value={profile.preferences.localInternationalSplit}
-              onChange={e => handlePreferenceChange('localInternationalSplit', parseInt(e.target.value, 10))}
-              className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-brand-primary"
-            />
-            <div className="flex justify-between text-xs text-gray-500 mt-1">
-              <span>All International</span>
-              <span>Balanced</span>
-              <span>All Local</span>
-            </div>
-          </div>
-        </div>
+            {/* Local vs International Split */}
+            <FormControl>
+              <FormLabel fontSize="sm" fontWeight="medium" color="text.secondary" mb={2}>
+                Local vs International Preference: {profile.preferences.localInternationalSplit}% Local
+              </FormLabel>
+              <Slider
+                value={profile.preferences.localInternationalSplit}
+                onChange={value => handlePreferenceChange('localInternationalSplit', value)}
+                min={0}
+                max={100}
+                colorScheme="blue"
+              >
+                <SliderTrack bg="gray.200">
+                  <SliderFilledTrack bg="brand.primary" />
+                </SliderTrack>
+                <SliderThumb boxSize={6} />
+              </Slider>
+              <Flex justify="space-between" fontSize="xs" color="gray.500" mt={1}>
+                <Text>All International</Text>
+                <Text>Balanced</Text>
+                <Text>All Local</Text>
+              </Flex>
+            </FormControl>
+          </Box>
 
-        {/* Market Context Section */}
-        <div className="space-y-2">
-          <h3 className="text-lg font-medium border-b pb-2 text-text-primary">Market Context</h3>
-          <label htmlFor="marketContext" className="block text-sm font-medium text-text-secondary">
-            Provide current market trends, news, or data (optional)
-          </label>
-          <p className="text-xs text-gray-500 mb-2">
-            Real-time data about {profile.country} markets will be automatically fetched using Google Search
-          </p>
-          <textarea
-            id="marketContext"
-            value={marketContext}
-            onChange={e => setMarketContext(e.target.value)}
-            rows={4}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-secondary focus:ring-brand-secondary sm:text-sm"
-            placeholder={`e.g., Focus on ${profile.country === Country.MALAWI ? 'Malawi Stock Exchange' : profile.country === Country.BOTSWANA ? 'Botswana mining sector' : 'emerging markets'}, currency trends...`}
-          ></textarea>
-        </div>
+          {/* Market Context Section */}
+          <Box>
+            <Heading as="h3" size="md" borderBottom="1px" borderColor="gray.200" pb={2} mb={2} color="text.primary">
+              Market Context
+            </Heading>
+            <FormControl>
+              <FormLabel fontSize="sm" fontWeight="medium" color="text.secondary">
+                Provide current market trends, news, or data (optional)
+              </FormLabel>
+              <Text fontSize="xs" color="gray.500" mb={2}>
+                Real-time data about {profile.country} markets will be automatically fetched using Google Search
+              </Text>
+              <Textarea
+                value={marketContext}
+                onChange={e => setMarketContext(e.target.value)}
+                rows={4}
+                focusBorderColor="brand.secondary"
+                placeholder={`e.g., Focus on ${profile.country === Country.MALAWI ? 'Malawi Stock Exchange' : profile.country === Country.BOTSWANA ? 'Botswana mining sector' : 'emerging markets'}, currency trends...`}
+              />
+            </FormControl>
+          </Box>
 
-        {/* File Upload Section */}
-        <div className="space-y-2">
-          <h3 className="text-lg font-medium border-b pb-2 text-text-primary">Spending Data (Optional)</h3>
-          <label htmlFor="file-upload" className="relative cursor-pointer rounded-md bg-white font-medium text-brand-secondary hover:text-brand-primary focus-within:outline-none focus-within:ring-2 focus-within:ring-brand-secondary focus-within:ring-offset-2">
-            <div className="flex items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg">
-              <div className="text-center">
-                <UploadIcon className="mx-auto h-8 w-8 text-gray-400" />
-                <p className="mt-1 text-sm text-gray-600">
-                  <span className="font-semibold">Upload a file</span> or drag and drop
-                </p>
-                <p className="text-xs text-gray-500">TXT, CSV, or other text files</p>
-                {fileName && <p className="text-xs text-brand-accent mt-2">{fileName}</p>}
-              </div>
-            </div>
-            <input id="file-upload" name="file-upload" type="file" className="sr-only" onChange={handleFileChange} />
-          </label>
-        </div>
+          {/* File Upload Section */}
+          <Box>
+            <Heading as="h3" size="md" borderBottom="1px" borderColor="gray.200" pb={2} mb={2} color="text.primary">
+              Spending Data (Optional)
+            </Heading>
+            <FormLabel
+              htmlFor="file-upload"
+              cursor="pointer"
+              borderRadius="lg"
+              bg="white"
+              fontWeight="medium"
+              color="brand.secondary"
+              _hover={{ color: 'brand.primary' }}
+            >
+              <Flex
+                align="center"
+                justify="center"
+                w="full"
+                h={32}
+                border="2px dashed"
+                borderColor="gray.300"
+                borderRadius="lg"
+              >
+                <Box textAlign="center">
+                  <Text mt={1} fontSize="sm" color="gray.600">
+                    <Text as="span" fontWeight="semibold">Upload a file</Text> or drag and drop
+                  </Text>
+                  <Text fontSize="xs" color="gray.500">TXT, CSV, or other text files</Text>
+                  {fileName && <Text fontSize="xs" color="brand.accent" mt={2}>{fileName}</Text>}
+                </Box>
+              </Flex>
+              <Input id="file-upload" name="file-upload" type="file" display="none" onChange={handleFileChange} />
+            </FormLabel>
+          </Box>
 
-        <button
-          type="submit"
-          disabled={isLoading}
-          className="w-full flex justify-center items-center gap-2 py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-brand-primary hover:bg-brand-secondary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-primary disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
-        >
-          {isLoading ? (
-            <>
-              <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              Crafting Portfolio...
-            </>
-          ) : (
-            <>
-              <WandIcon className="w-5 h-5" />
-              Generate Portfolio
-            </>
-          )}
-        </button>
+          <Button
+            type="submit"
+            isLoading={isLoading}
+            loadingText="Crafting Portfolio..."
+            w="full"
+            colorScheme="blue"
+            bg="brand.primary"
+            color="white"
+            _hover={{ bg: 'brand.secondary' }}
+            size="lg"
+            leftIcon={!isLoading ? <WandIcon className="w-5 h-5" /> : undefined}
+          >
+            Generate Portfolio
+          </Button>
+        </VStack>
       </form>
     </Card>
   );

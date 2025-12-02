@@ -1,16 +1,20 @@
-
 import React from 'react';
+import { Box, BoxProps } from '@chakra-ui/react';
 
-interface CardProps {
+interface CardProps extends BoxProps {
   children: React.ReactNode;
-  className?: string;
 }
 
-const Card: React.FC<CardProps> = ({ children, className = '' }) => {
+const Card: React.FC<CardProps> = ({ children, ...props }) => {
   return (
-    <div className={`bg-base-100 rounded-xl shadow-lg p-6 md:p-8 ${className}`}>
+    <Box
+      bg="base.100"
+      borderRadius="md"
+      p={{ base: 6, md: 8 }}
+      {...props}
+    >
       {children}
-    </div>
+    </Box>
   );
 };
 

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
+import { Box, Container, Heading, Text, Grid, GridItem } from '@chakra-ui/react';
 import PortfolioForm from '@/components/PortfolioForm';
 import PortfolioResult from '@/components/PortfolioResult';
 import { UserProfile, PortfolioRecommendation } from '@/types';
@@ -46,31 +47,31 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-base-200 font-sans text-text-primary">
-      <header className="bg-brand-primary shadow-md">
-        <div className="container mx-auto px-4 py-5">
-          <h1 className="text-2xl font-bold text-white">FinCraft AI</h1>
-          <p className="text-sm text-blue-200">Your Personalized Portfolio Architect</p>
-        </div>
-      </header>
+    <Box minH="100vh" bg="base.200" color="text.primary">
+      <Box as="header" bg="brand.primary">
+        <Container maxW="1400px" px={4} py={5}>
+          <Heading as="h1" size="lg" color="white">FinCraft AI</Heading>
+          <Text fontSize="sm" color="blue.200">Your Personalized Portfolio Architect</Text>
+        </Container>
+      </Box>
 
-      <main className="container mx-auto p-4 md:p-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div>
-            <h2 className="text-xl font-semibold mb-4 text-text-primary">Investment Profile</h2>
+      <Container as="main" maxW="1400px" p={{ base: 4, md: 8 }}>
+        <Grid templateColumns={{ base: '1fr', lg: '600px 1fr' }} gap={8}>
+          <GridItem minW="0">
+            <Heading as="h2" size="md" mb={4} color="text.primary">Investment Profile</Heading>
             <PortfolioForm onSubmit={handleFormSubmit} isLoading={isLoading} />
-          </div>
-          <div>
-            <h2 className="text-xl font-semibold mb-4 text-text-primary">AI-Generated Portfolio</h2>
+          </GridItem>
+          <GridItem minW="0">
+            <Heading as="h2" size="md" mb={4} color="text.primary">AI-Generated Portfolio</Heading>
             <PortfolioResult portfolio={portfolio} userProfile={userProfile} isLoading={isLoading} error={error} />
-          </div>
-        </div>
-      </main>
+          </GridItem>
+        </Grid>
+      </Container>
 
-      <footer className="text-center py-6 text-text-secondary text-sm">
-        <p>Disclaimer: FinCraft AI provides recommendations for informational purposes only and does not constitute financial advice.</p>
-        <p>&copy; {new Date().getFullYear()} FinCraft AI. All rights reserved.</p>
-      </footer>
-    </div>
+      <Box as="footer" textAlign="center" py={6} color="text.secondary" fontSize="sm">
+        <Text>Disclaimer: FinCraft AI provides recommendations for informational purposes only and does not constitute financial advice.</Text>
+        <Text>&copy; {new Date().getFullYear()} FinCraft AI. All rights reserved.</Text>
+      </Box>
+    </Box>
   );
 }

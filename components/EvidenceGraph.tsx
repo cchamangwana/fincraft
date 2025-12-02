@@ -1,6 +1,22 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
+import {
+  Box,
+  Badge,
+  Button,
+  Flex,
+  Grid,
+  GridItem,
+  Heading,
+  Icon,
+  Link,
+  List,
+  ListItem,
+  Progress,
+  Text,
+  VStack,
+} from '@chakra-ui/react';
 import { EvidenceSupport, Citation } from '@/types';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
@@ -20,16 +36,23 @@ interface TooltipData {
 const COLORS = ['#1e3a8a', '#3b82f6', '#10b981', '#f59e0b', '#6366f1', '#ec4899'];
 
 const ConfidenceBadge: React.FC<{ level: 'high' | 'medium' | 'low'; value: number }> = ({ level, value }) => {
-  const colors = {
-    high: 'bg-green-100 text-green-800 border-green-200',
-    medium: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-    low: 'bg-red-100 text-red-800 border-red-200',
+  const colorScheme = {
+    high: 'green',
+    medium: 'yellow',
+    low: 'red',
   };
 
   return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${colors[level]}`}>
+    <Badge
+      colorScheme={colorScheme[level]}
+      fontSize="xs"
+      fontWeight="medium"
+      px={2}
+      py={0.5}
+      borderRadius="full"
+    >
       {(value * 100).toFixed(0)}%
-    </span>
+    </Badge>
   );
 };
 
@@ -37,19 +60,19 @@ const CustomPieTooltip: React.FC<any> = ({ active, payload }) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
     return (
-      <div className="bg-white p-3 border border-gray-300 rounded-lg shadow-lg max-w-xs">
-        <p className="font-bold text-text-primary">{data.category}</p>
-        <p className="text-sm text-text-secondary">
+      <Box bg="white" p={3} border="1px" borderColor="gray.300" borderRadius="lg" maxW="xs">
+        <Text fontWeight="bold" color="text.primary">{data.category}</Text>
+        <Text fontSize="sm" color="text.secondary">
           {data.sourceCount} source{data.sourceCount !== 1 ? 's' : ''}
-        </p>
-        <div className="flex items-center gap-2 mt-1">
-          <span className="text-xs">Confidence:</span>
-          <ConfidenceBadge 
-            level={data.avgConfidence >= 0.85 ? 'high' : data.avgConfidence >= 0.7 ? 'medium' : 'low'} 
-            value={data.avgConfidence} 
+        </Text>
+        <Flex align="center" gap={2} mt={1}>
+          <Text fontSize="xs">Confidence:</Text>
+          <ConfidenceBadge
+            level={data.avgConfidence >= 0.85 ? 'high' : data.avgConfidence >= 0.7 ? 'medium' : 'low'}
+            value={data.avgConfidence}
           />
-        </div>
-      </div>
+        </Flex>
+      </Box>
     );
   }
   return null;
@@ -57,7 +80,7 @@ const CustomPieTooltip: React.FC<any> = ({ active, payload }) => {
 
 const EvidenceGraph: React.FC<EvidenceGraphProps> = ({ evidenceData, overallConfidence }) => {
   const [selectedCategory, setSelectedCategory] = useState<TooltipData | null>(null);
-  
+
   // Prepare data for pie chart - using source count as the value
   const chartData = useMemo(() => {
     return evidenceData.map((evidence, index) => ({
@@ -88,45 +111,54 @@ const EvidenceGraph: React.FC<EvidenceGraphProps> = ({ evidenceData, overallConf
   };
 
   return (
-    <div className="bg-gradient-to-br from-slate-50 to-blue-50 border border-slate-200 p-5 rounded-xl">
+    <Box
+      bgGradient="linear(to-br, slate.50, blue.50)"
+      border="1px"
+      borderColor="slate.200"
+      p={5}
+      borderRadius="md"
+      overflow="hidden"
+    >
       {/* Header with overall confidence */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
-          <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-          </svg>
-          <h4 className="font-bold text-slate-800">Evidence Graph</h4>
-        </div>
+      <Flex align="center" justify="space-between" mb={4}>
+        <Flex align="center" gap={2}>
+          <Icon boxSize={5} color="blue.600">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+          </Icon>
+          <Heading as="h4" size="sm" fontWeight="bold" color="slate.800">Evidence Graph</Heading>
+        </Flex>
         {overallConfidence !== undefined && (
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-text-secondary">Overall Confidence:</span>
+          <Flex align="center" gap={2}>
+            <Text fontSize="sm" color="text.secondary">Overall Confidence:</Text>
             <ConfidenceBadge level={overallLevel} value={overallConfidence} />
-          </div>
+          </Flex>
         )}
-      </div>
+      </Flex>
 
-      <p className="text-sm text-text-secondary mb-4">
+      <Text fontSize="sm" color="text.secondary" mb={4}>
         Visual representation of evidence strength per asset class. Click on a segment to see detailed sources.
-      </p>
+      </Text>
 
       {/* Legend for confidence levels */}
-      <div className="flex flex-wrap gap-4 mb-4 text-xs">
-        <div className="flex items-center gap-1">
-          <div className="w-3 h-3 bg-green-500 rounded" />
-          <span>High confidence (≥85%)</span>
-        </div>
-        <div className="flex items-center gap-1">
-          <div className="w-3 h-3 bg-yellow-500 rounded" />
-          <span>Medium (70-84%)</span>
-        </div>
-        <div className="flex items-center gap-1">
-          <div className="w-3 h-3 bg-red-500 rounded" />
-          <span>Low (&lt;70%)</span>
-        </div>
-      </div>
+      <Flex flexWrap="wrap" gap={4} mb={4} fontSize="xs">
+        <Flex align="center" gap={1}>
+          <Box w={3} h={3} bg="green.500" borderRadius="sm" />
+          <Text>High confidence (≥85%)</Text>
+        </Flex>
+        <Flex align="center" gap={1}>
+          <Box w={3} h={3} bg="yellow.500" borderRadius="sm" />
+          <Text>Medium (70-84%)</Text>
+        </Flex>
+        <Flex align="center" gap={1}>
+          <Box w={3} h={3} bg="red.500" borderRadius="sm" />
+          <Text>Low (&lt;70%)</Text>
+        </Flex>
+      </Flex>
 
       {/* Pie Chart */}
-      <div className="h-64 md:h-80 w-full">
+      <Box h={{ base: 64, md: 80 }} w="full">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
@@ -160,18 +192,25 @@ const EvidenceGraph: React.FC<EvidenceGraphProps> = ({ evidenceData, overallConf
             <Legend />
           </PieChart>
         </ResponsiveContainer>
-      </div>
+      </Box>
 
       {/* Evidence summary cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mt-4">
+      <Grid templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' }} gap={3} mt={4}>
         {evidenceData.map((evidence, index) => (
-          <div
+          <GridItem
             key={index}
-            className={`p-3 rounded-lg border-2 cursor-pointer transition-all ${
-              selectedCategory?.category === evidence.category
-                ? 'border-blue-500 bg-blue-50'
-                : 'border-gray-200 bg-white hover:border-gray-300'
-            }`}
+            p={3}
+            borderRadius="md"
+            border="2px"
+            borderColor={selectedCategory?.category === evidence.category ? 'blue.500' : 'gray.200'}
+            bg={selectedCategory?.category === evidence.category ? 'blue.50' : 'white'}
+            cursor="pointer"
+            transition="all 0.2s"
+            minW="0"
+            overflow="hidden"
+            _hover={{
+              borderColor: selectedCategory?.category === evidence.category ? 'blue.500' : 'gray.300'
+            }}
             onClick={() => setSelectedCategory({
               category: evidence.category,
               citations: evidence.supportingCitations,
@@ -180,103 +219,109 @@ const EvidenceGraph: React.FC<EvidenceGraphProps> = ({ evidenceData, overallConf
               sourceCount: evidence.sourceCount,
             })}
           >
-            <div className="flex items-center gap-2 mb-1">
-              <div 
-                className="w-3 h-3 rounded-full" 
-                style={{ backgroundColor: COLORS[index % COLORS.length] }}
+            <Flex align="center" gap={2} mb={1}>
+              <Box
+                w={3}
+                h={3}
+                borderRadius="full"
+                bg={COLORS[index % COLORS.length]}
               />
-              <span className="font-medium text-sm text-text-primary truncate">{evidence.category}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-text-secondary">
+              <Text fontWeight="medium" fontSize="sm" color="text.primary" isTruncated>{evidence.category}</Text>
+            </Flex>
+            <Flex align="center" justify="space-between">
+              <Text fontSize="xs" color="text.secondary">
                 {evidence.sourceCount} source{evidence.sourceCount !== 1 ? 's' : ''}
-              </span>
+              </Text>
               <ConfidenceBadge level={evidence.confidenceLevel} value={evidence.avgConfidence} />
-            </div>
+            </Flex>
             {evidence.alignmentScore !== undefined && (
-              <div className="mt-2">
-                <div className="flex items-center justify-between text-xs text-text-secondary mb-1">
-                  <span>Alignment</span>
-                  <span>{(evidence.alignmentScore * 100).toFixed(0)}%</span>
-                </div>
-                <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-blue-500 rounded-full"
-                    style={{ width: `${evidence.alignmentScore * 100}%` }}
-                  />
-                </div>
-              </div>
+              <Box mt={2}>
+                <Flex align="center" justify="space-between" fontSize="xs" color="text.secondary" mb={1}>
+                  <Text>Alignment</Text>
+                  <Text>{(evidence.alignmentScore * 100).toFixed(0)}%</Text>
+                </Flex>
+                <Progress value={evidence.alignmentScore * 100} colorScheme="blue" size="sm" borderRadius="full" />
+              </Box>
             )}
-          </div>
+          </GridItem>
         ))}
-      </div>
+      </Grid>
 
       {/* Selected category detail panel */}
       {selectedCategory && (
-        <div className="mt-4 p-4 bg-white border border-blue-200 rounded-lg shadow-lg">
-          <div className="flex items-center justify-between mb-3">
-            <h5 className="font-semibold text-brand-primary">{selectedCategory.category}</h5>
-            <button
+        <Box mt={4} p={4} bg="white" border="1px" borderColor="blue.200" borderRadius="md">
+          <Flex align="center" justify="space-between" mb={3}>
+            <Heading as="h5" size="sm" fontWeight="semibold" color="brand.primary">{selectedCategory.category}</Heading>
+            <Button
               onClick={() => setSelectedCategory(null)}
-              className="text-gray-400 hover:text-gray-600"
+              variant="ghost"
+              size="sm"
+              color="gray.400"
+              _hover={{ color: 'gray.600' }}
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-          
-          <div className="grid grid-cols-2 gap-4 mb-3">
-            <div className="bg-gray-50 p-2 rounded">
-              <p className="text-xs text-text-secondary">Sources</p>
-              <p className="font-bold text-lg">{selectedCategory.sourceCount}</p>
-            </div>
-            <div className="bg-gray-50 p-2 rounded">
-              <p className="text-xs text-text-secondary">Avg Confidence</p>
-              <p className="font-bold text-lg">{(selectedCategory.avgConfidence * 100).toFixed(0)}%</p>
-            </div>
-          </div>
+              <Icon boxSize={5}>
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </Icon>
+            </Button>
+          </Flex>
+
+          <Grid templateColumns="repeat(2, 1fr)" gap={4} mb={3}>
+            <GridItem bg="gray.50" p={2} borderRadius="md">
+              <Text fontSize="xs" color="text.secondary">Sources</Text>
+              <Text fontWeight="bold" fontSize="lg">{selectedCategory.sourceCount}</Text>
+            </GridItem>
+            <GridItem bg="gray.50" p={2} borderRadius="md">
+              <Text fontSize="xs" color="text.secondary">Avg Confidence</Text>
+              <Text fontWeight="bold" fontSize="lg">{(selectedCategory.avgConfidence * 100).toFixed(0)}%</Text>
+            </GridItem>
+          </Grid>
 
           {selectedCategory.alignmentScore !== undefined && (
-            <p className="text-sm text-text-secondary mb-3">
-              Evidence alignment: <strong>{(selectedCategory.alignmentScore * 100).toFixed(0)}%</strong> match between sources and recommendation
-            </p>
+            <Text fontSize="sm" color="text.secondary" mb={3}>
+              Evidence alignment: <Text as="span" fontWeight="bold">{(selectedCategory.alignmentScore * 100).toFixed(0)}%</Text> match between sources and recommendation
+            </Text>
           )}
 
           {selectedCategory.citations.length > 0 ? (
-            <div>
-              <p className="text-xs font-semibold text-text-secondary uppercase mb-2">Supporting Sources:</p>
-              <ul className="space-y-2">
+            <Box>
+              <Text fontSize="xs" fontWeight="semibold" color="text.secondary" textTransform="uppercase" mb={2}>Supporting Sources:</Text>
+              <List spacing={2}>
                 {selectedCategory.citations.map((citation, idx) => (
-                  <li key={idx} className="text-sm flex items-start gap-2 p-2 bg-gray-50 rounded">
-                    <span className="text-blue-600 font-medium">[{idx + 1}]</span>
-                    <div className="flex-1 min-w-0">
-                      <a
-                        href={citation.uri}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 hover:text-blue-800 hover:underline block truncate"
-                      >
-                        {citation.title}
-                      </a>
-                      {citation.confidence !== undefined && (
-                        <span className="text-xs text-text-secondary">
-                          Confidence: {(citation.confidence * 100).toFixed(0)}%
-                        </span>
-                      )}
-                    </div>
-                  </li>
+                  <ListItem key={idx} fontSize="sm" p={2} bg="gray.50" borderRadius="md">
+                    <Flex align="flex-start" gap={2}>
+                      <Text color="blue.600" fontWeight="medium">[{idx + 1}]</Text>
+                      <Box flex={1} minW={0}>
+                        <Link
+                          href={citation.uri}
+                          isExternal
+                          color="blue.600"
+                          _hover={{ color: 'blue.800', textDecoration: 'underline' }}
+                          display="block"
+                          isTruncated
+                        >
+                          {citation.title}
+                        </Link>
+                        {citation.confidence !== undefined && (
+                          <Text fontSize="xs" color="text.secondary">
+                            Confidence: {(citation.confidence * 100).toFixed(0)}%
+                          </Text>
+                        )}
+                      </Box>
+                    </Flex>
+                  </ListItem>
                 ))}
-              </ul>
-            </div>
+              </List>
+            </Box>
           ) : (
-            <p className="text-sm text-text-secondary italic">
+            <Text fontSize="sm" color="text.secondary" fontStyle="italic">
               No specific sources identified for this category. Evidence is derived from general market data.
-            </p>
+            </Text>
           )}
-        </div>
+        </Box>
       )}
-    </div>
+    </Box>
   );
 };
 
